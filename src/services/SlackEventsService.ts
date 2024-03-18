@@ -10,7 +10,7 @@ interface Event {
 }
 
 class SlackEventsService {
-  async appMention(req: Express.Request, res: Express.Response) {
+  async answerQuestion(req: Express.Request, res: Express.Response) {
     const event = req.body.event as Event;
     const { channel, ts } = event;
 
@@ -18,10 +18,12 @@ class SlackEventsService {
       const message = await slack.chat.postMessage({
         channel,
         thread_ts: ts,
-        text: "I'm thinking...",
+        text: "Typing...",
       });
 
-      const sendMessageEndpointUrl = `${req.protocol}://${req.hostname}/send-message`;
+      const protocol = req.headers["x-forwarded-proto"] || req.secure;
+
+      const sendMessageEndpointUrl = `${protocol}://${req.hostname}/send-message`;
 
       // send message in background, this is for slack's 3 second response time limit
       const sendMessageBody = JSON.stringify({
@@ -53,12 +55,12 @@ class SlackEventsService {
           },
           body: sendMessageBody,
         });
-        console.log("Request sent successfully!");
+        console.log(`Request sent successfully to ${sendMessageEndpointUrl}`);
       } catch (error) {
         console.error("Error sending request:", error);
       }
       // a hacky way to ensure the request is sent
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     } catch (error) {
       if (error instanceof Error) {
         await slack.chat.postMessage({

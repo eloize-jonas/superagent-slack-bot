@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc -p .",
     "build:watch": "tsc -w -p .",
-    "start": "npm run build && node dist/app.js",
-    "dev": "NODE_ENV=development nodemon dist/app.js"
+    "start": "node dist/server/main.js",
+    "dev": "nodemon dist/server/main.js"
   },
   "license": "MIT",
   "dependencies": {
